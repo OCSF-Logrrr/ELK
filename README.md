@@ -47,19 +47,45 @@ MEM_LIMIT=1073741824
 
 ### 2. 실행
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 첫 실행 시 인증서가 자동 생성되며, `setup` 컨테이너가 종료된 뒤 클러스터가 구성됩니다.
 
+
+![image](https://github.com/user-attachments/assets/9a316fba-462e-4fb2-9eba-2b6f8a8ee5cc)
+
+
 ---
 
-## 🔒 TLS 인증 확인
+## ✅ 클러스터 상태 확인 명령어
 
-Logstash 컨테이너에서 다음 명령으로 TLS 연결 확인:
+1. Logstash 컨테이너 내부에서 Elasticsearch 클러스터 상태를 확인하려면 다음 명령어를 실행하세요:
+
 ```bash
-curl -v --cacert /usr/share/logstash/certs/ca/ca.crt -u elastic:p@ssw0rd1234 https://es01:9200/_cluster/health?pretty
+docker exec -it basic-elk-logstash-1 bash -c \
+  "curl -v \
+    --cacert /usr/share/logstash/certs/ca/ca.crt \
+    -u elastic:p@ssw0rd1234 \
+    https://es01:9200/_cluster/health?pretty"
 ```
+
+![image](https://github.com/user-attachments/assets/8597e2d4-e5aa-405e-bbb2-aaa07ea6368a)
+
+
+2. Kibana 컨테이너 내부에서 Elasticsearch 클러스터 상태를 확인하려면 다음 명령어를 실행하세요:
+
+```bash
+docker exec -it basic-elk-kibana-1 bash -c \
+  "curl -v \
+   --cacert /usr/share/kibana/config/certs/ca/ca.crt \
+   -u elastic:p@ssw0rd1234 \
+   https://es01:9200/_cluster/health?pretty"
+```
+
+![image](https://github.com/user-attachments/assets/a66cd36b-b62b-464b-b134-e4cc4391cc6b)
+
+이렇게 출력되면 성공 !
 
 ---
 
