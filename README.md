@@ -58,7 +58,7 @@ docker-compose up -d
 
 Logstash 컨테이너에서 다음 명령으로 TLS 연결 확인:
 ```bash
-curl -v   --cacert /usr/share/logstash/certs/ca/ca.crt   -u elastic:p@ssw0rd1234   https://es01:9200/_cluster/health?pretty
+curl -v --cacert /usr/share/logstash/certs/ca/ca.crt -u elastic:p@ssw0rd1234 https://es01:9200/_cluster/health?pretty
 ```
 
 ---
