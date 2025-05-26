@@ -1,10 +1,9 @@
-# 🔧 Simple ELK Stack with Docker Compose (SSL Enabled)
+# 🔧 Simple ELK Stack with Docker Compose
 
 ## 📌 구성 요소
 - **Elasticsearch** 8.6.2 (3-node cluster)
 - **Kibana** 8.6.2
 - **Logstash** 8.6.2
-- **TLS 인증서 기반 보안 통신**
 - **도커 컴포즈 기반의 간편한 배포**
 
 ---
@@ -13,6 +12,7 @@
 ```
 ELK/
 ├── .env
+├── bulk.template
 ├── docker-compose.yml
 └── logstash/
     └── pipeline/
@@ -55,37 +55,6 @@ docker compose up -d
 
 ![image](https://github.com/user-attachments/assets/9a316fba-462e-4fb2-9eba-2b6f8a8ee5cc)
 
-
----
-
-## ✅ 클러스터 상태 확인 명령어
-
-1. Logstash 컨테이너 내부에서 Elasticsearch 클러스터 상태를 확인하려면 다음 명령어를 실행하세요:
-
-```bash
-docker exec -it basic-elk-logstash-1 bash -c \
-  "curl -v \
-    --cacert /usr/share/logstash/certs/ca/ca.crt \
-    -u elastic:p@ssw0rd1234 \
-    https://es01:9200/_cluster/health?pretty"
-```
-
-![image](https://github.com/user-attachments/assets/8597e2d4-e5aa-405e-bbb2-aaa07ea6368a)
-
-
-2. Kibana 컨테이너 내부에서 Elasticsearch 클러스터 상태를 확인하려면 다음 명령어를 실행하세요:
-
-```bash
-docker exec -it basic-elk-kibana-1 bash -c \
-  "curl -v \
-   --cacert /usr/share/kibana/config/certs/ca/ca.crt \
-   -u elastic:p@ssw0rd1234 \
-   https://es01:9200/_cluster/health?pretty"
-```
-
-![image](https://github.com/user-attachments/assets/a66cd36b-b62b-464b-b134-e4cc4391cc6b)
-
-이렇게 출력되면 성공 !
 
 ---
 
