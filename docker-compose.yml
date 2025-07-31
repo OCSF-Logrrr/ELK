@@ -21,6 +21,7 @@ services:
           bin/elasticsearch-certutil ca --silent --pem -out config/certs/ca.zip;
           unzip config/certs/ca.zip -d config/certs;
         fi;
+
         if [ ! -f config/certs/certs.zip ]; then
           echo "Creating certs";
           echo -ne \
@@ -53,6 +54,7 @@ services:
           bin/elasticsearch-certutil cert --silent --pem -out config/certs/certs.zip --in config/certs/instances.yml --ca-cert config/certs/ca/ca.crt --ca-key config/certs/ca/ca.key;
           unzip config/certs/certs.zip -d config/certs;
         fi;
+
         echo "Setting file permissions";
         chown -R root:root config/certs;
         find . -type d -exec chmod 750 {} \;;
@@ -82,6 +84,7 @@ services:
     environment:
       - node.name=es01
       - cluster.name=${CLUSTER_NAME}
+      - NETWORK_HOST=0.0.0.0
       - cluster.initial_master_nodes=es01,es02,es03
       - discovery.seed_hosts=es02,es03
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
@@ -196,8 +199,9 @@ services:
       - SERVERNAME=kibana
       - ELASTICSEARCH_HOSTS="https://es01:9200"
       - ELASTICSEARCH_USERNAME="kibana_system"
-      - ELASTICSEARCH_PASSWORD="${KIBANA_PASSWORD}"
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
       - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=config/certs/ca/ca.crt
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=b1g_R@nd0m_32+character_Secret_key!!
     mem_limit: ${MEM_LIMIT}
     healthcheck:
       test: ["CMD-SHELL", "curl -s -I http://localhost:5601 | grep -q 'HTTP/1.1 302 Found'"]
@@ -228,6 +232,38 @@ services:
       interval: 10s
       timeout: 10s
       retries: 10
+
+  pysigma:
+    build: ./psigma-bot
+    container_name: pysigma
+    depends_on:
+      es01:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - RULE_BASE=/rules
+    volumes:
+      - ./psigma-bot:/app
+      - ./sigma/rules-logrr:/rules
+    restart: always
+
+  pysigma-pattern-sigma:
+    build: ./pysigma-pattern-match
+    container_name: pysigma-pattern-sigma
+    depends_on:
+      es01:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - RULE_BASE=/rules
+      - PATTERN_BASE=/patterns
+    volumes:
+      - ./pysigma-pattern-match:/app
+      - ./pysigma-pattern-match/rules:/rules
+      - ./pysigma-pattern-match/patterns:/patterns
+    restart: always
 
 volumes:
   certs:
